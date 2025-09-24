@@ -18,8 +18,11 @@ def caesar_decrypt(message, key):
 
 # lê a mensagem recebida e transforma em obj
 def read_json(s):
-    res = json.loads(s)
-    return res
+    try:
+        res = json.loads(s)
+        return res
+    except Exception as e:
+        print("A mensagem recebida não está formatada como JSON", e)
 
 # verifica se o dispositivo ta na lista de dispositivos validos
 def device_validator(msg):
@@ -47,15 +50,16 @@ def on_message(client, userdata, msg):
         print("Mensagem decodificada:", decoded_message)
         decoded_dict = read_json(msg.payload.decode('utf-8')) 
         decode_flag = True
+        if device_validator(decoded_dict) and decode_flag:
+            print(f"string recebida: {msg.payload.decode('utf-8')}") #TODO arrumar pra guardar os dados
+        elif not device_validator(decoded_dict): 
+            print("ALERTA: Dispositivo não identificado.")
     except Exception as e:
-        print("Não foi possível descriptografar:", e)
+        print("Erro ao processar mensagem:", e)
         decode_flag = False
         decoded_dict = None
 
-    if device_validator(decoded_dict) and decode_flag:
-        print(f"string recebida: {msg.payload.decode('utf-8')}") #TODO arrumar pra guardar os dados
-    elif not device_validator(decoded_dict): 
-        print("ALERTA: Dispositivo não identificado.")
+    
 
 # instância de cliente mqtt
 mqttc = mqtt.Client(paho_cte.CallbackAPIVersion.VERSION2)
