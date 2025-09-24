@@ -1,7 +1,7 @@
 import json
 import paho.mqtt.client as mqtt
 
-# variaveis universais
+# constantes universais
 KEY = 1
 DISPOSITIVOS_VALIDOS = ["dev1", "dev2", "dev3"]
 
@@ -28,16 +28,20 @@ def device_validator(msg):
 
 # FUNCOES DO MQTT
 def on_connect(client, userdata, flags, reason_code, properties):
+    """"callback pra conexão com o broker bem-sucedida"""
+
     print(f"Conectado com result code {reason_code}")
     client.subscribe("$SYS/#")
 
 def on_message(client, userdata, msg):
+    """"callback pra recepcao de mensagem"""
+    
     try:
         decoded_message = caesar_decrypt(msg, KEY)
         decoded_dict = read_json(decoded_message)
     except Exception as e:
         print("Não foi possível descriptografar:", e)
-        
+
     if device_validator(decoded_dict):
         pass #TODO guardar os dados
     else: 
