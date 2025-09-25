@@ -3,7 +3,7 @@ import paho.mqtt.client as mqtt
 from paho.mqtt import enums as paho_cte
 
 # constantes universais
-KEY = 1
+KEY = 3
 DISPOSITIVOS_VALIDOS = ["dev1", "dev2", "dev3"]
 
 # decripta a cifra de cesar pela tabela ascii
@@ -11,9 +11,12 @@ def caesar_decrypt(message, key):
     res = ''
     text = message.payload.decode('utf-8')
     for c in text:
-        aux = ord(c) - key
-        c = chr(aux)
-        res += c
+        code = ord(c)
+        if 32 <= code <= 126:
+            base = 32
+            range_ = 95  # 126 - 32 + 1
+            code = base + ((code - base - key) % range_)
+        res += chr(code)
     return res
 
 # lê a mensagem recebida e transforma em obj
@@ -32,11 +35,11 @@ def device_validator(msg):
 
 
 # FUNCOES DO MQTT
-def on_connect(client, userdata, flags, reason_code, properties):
+def on_connect(client, userdata, flags, reason_code, properties=None):
     """"callback pra conexão com o broker bem-sucedida"""
 
     print(f"Conectado com result code {reason_code}")
-    client.subscribe("/test")
+    client.subscribe("equipe/sensor")
 
 def on_connect_fail(client, userdata):
     print("Ocorreu um erro na conexão com o broker")
@@ -48,10 +51,10 @@ def on_message(client, userdata, msg):
     try:
         decoded_message = caesar_decrypt(msg, KEY)
         print("Mensagem decodificada:", decoded_message)
-        decoded_dict = read_json(msg.payload.decode('utf-8')) 
+        decoded_dict = read_json(decoded_message) 
         decode_flag = True
         if device_validator(decoded_dict) and decode_flag:
-            print(f"string recebida: {msg.payload.decode('utf-8')}") #TODO arrumar pra guardar os dados
+            print(f"string recebida: {decoded_message}") #TODO arrumar pra guardar os dados
         elif not device_validator(decoded_dict): 
             print("ALERTA: Dispositivo não identificado.")
     except Exception as e:
@@ -67,5 +70,5 @@ mqttc.on_connect = on_connect
 mqttc.on_connect_fail = on_connect_fail
 mqttc.on_message = on_message
 
-mqttc.connect("localhost")
+mqttc.connect("test.mosquitto.org", 1883, 60)
 mqttc.loop_forever()
