@@ -35,7 +35,7 @@ def device_validator(msg):
 def on_connect(client, userdata, flags, reason_code, properties):
     """"callback pra conexão com o broker bem-sucedida"""
 
-    print(f"Conectado com result code {reason_code}")
+    print(f"Conectado com result code {reason_code}\n")
     client.subscribe("/test")
 
 def on_connect_fail(client, userdata):
@@ -44,14 +44,14 @@ def on_connect_fail(client, userdata):
 
 def on_message(client, userdata, msg):
     """"callback pra recepcao de mensagem"""
-    print(msg.payload.decode('utf-8'))
+    print(msg.payload.decode('utf-8'), "\n")
     try:
         decoded_message = caesar_decrypt(msg, KEY)
         print("Mensagem decodificada:", decoded_message)
-        decoded_dict = read_json(msg.payload.decode('utf-8')) 
+        decoded_dict = read_json(decoded_message) 
         decode_flag = True
         if device_validator(decoded_dict) and decode_flag:
-            print(f"string recebida: {msg.payload.decode('utf-8')}") #TODO arrumar pra guardar os dados
+            print(f"Temperatura {decoded_dict['temp']} captada pelo dispositivo {decoded_dict['device_id']}") #TODO arrumar pra guardar os dados
         elif not device_validator(decoded_dict): 
             print("ALERTA: Dispositivo não identificado.")
     except Exception as e:
