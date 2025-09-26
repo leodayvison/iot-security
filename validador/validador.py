@@ -3,7 +3,7 @@ import paho.mqtt.client as mqtt
 from paho.mqtt import enums as paho_cte
 
 # constantes universais
-KEY = 1
+KEY = 3
 DISPOSITIVOS_VALIDOS = ["dev1", "dev2", "dev3"]
 
 # decripta a cifra de cesar pela tabela ascii
@@ -11,9 +11,12 @@ def caesar_decrypt(message, key):
     res = ''
     text = message.payload.decode('utf-8')
     for c in text:
-        aux = ord(c) - key
-        c = chr(aux)
-        res += c
+        code = ord(c)
+        if 32 <= code <= 126:
+            base = 32
+            range_ = 95  # 126 - 32 + 1
+            code = base + ((code - base - key) % range_)
+        res += chr(code)
     return res
 
 # lê a mensagem recebida e transforma em obj
@@ -32,11 +35,11 @@ def device_validator(msg):
 
 
 # FUNCOES DO MQTT
-def on_connect(client, userdata, flags, reason_code, properties):
+def on_connect(client, userdata, flags, reason_code, properties=None):
     """"callback pra conexão com o broker bem-sucedida"""
 
-    print(f"Conectado com result code {reason_code}\n")
-    client.subscribe("/test")
+    print(f"Conectado com result code {reason_code}")
+    client.subscribe("equipe/sensor")
 
 def on_connect_fail(client, userdata):
     print("Ocorreu um erro na conexão com o broker")
@@ -67,5 +70,5 @@ mqttc.on_connect = on_connect
 mqttc.on_connect_fail = on_connect_fail
 mqttc.on_message = on_message
 
-mqttc.connect("localhost")
+mqttc.connect("test.mosquitto.org", 1883, 60)
 mqttc.loop_forever()
