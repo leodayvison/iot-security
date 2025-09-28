@@ -54,7 +54,7 @@ def on_message(client, userdata, msg):
         decoded_dict = read_json(decoded_message) 
         decode_flag = True
         if device_validator(decoded_dict) and decode_flag:
-            print(f"O sensor {decoded_dict['sensor']} do dispositivo {decoded_dict['device_id']} captou o valor de {decoded_dict['value']}") #TODO arrumar pra guardar os dados
+            print(f"O sensor {decoded_dict['sensor']} do dispositivo {decoded_dict['device_id']} captou o valor de {decoded_dict['value']}") 
         elif not device_validator(decoded_dict): 
             print("ALERTA: Dispositivo não identificado.")
     except Exception as e:
