@@ -47,10 +47,10 @@ def on_connect_fail(client, userdata):
 
 def on_message(client, userdata, msg):
     """"callback pra recepcao de mensagem"""
-    print(msg.payload.decode('utf-8'), "\n")
+    print("Mensagem criptografada:", msg.payload.decode('utf-8'), "\n")
     try:
         decoded_message = caesar_decrypt(msg, KEY)
-        print("Mensagem decodificada:", decoded_message)
+        print("Mensagem decriptografada:", decoded_message)
         decoded_dict = read_json(decoded_message) 
         decode_flag = True
         if device_validator(decoded_dict) and decode_flag:
